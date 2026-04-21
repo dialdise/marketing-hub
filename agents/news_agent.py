@@ -153,11 +153,17 @@ Call the save_ideas tool with your 10 ideas."""
         messages=[{"role": "user", "content": prompt}],
     )
 
+    print(f"[NewsAgent] stop_reason={message.stop_reason}, blocks={[b.type for b in message.content]}")
+
     for block in message.content:
         if block.type == "tool_use" and block.name == "save_ideas":
-            return block.input["ideas"]
+            ideas = block.input.get("ideas", block.input) if isinstance(block.input, dict) else []
+            print(f"[NewsAgent] tool input keys={list(block.input.keys()) if isinstance(block.input, dict) else type(block.input)}, ideas count={len(ideas) if isinstance(ideas, list) else ideas}")
+            if isinstance(ideas, list):
+                return ideas
+            raise ValueError(f"Unexpected tool input structure: {block.input}")
 
-    raise ValueError("No tool_use block returned by Claude")
+    raise ValueError("No tool_use block in response")
 
 
 def run_news_scan():

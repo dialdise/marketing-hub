@@ -95,6 +95,36 @@ def _mock_articles() -> list[dict]:
     ]
 
 
+_IDEAS_TOOL = {
+    "name": "save_ideas",
+    "description": "Save the generated content ideas to the database",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "ideas": {
+                "type": "array",
+                "minItems": 10,
+                "maxItems": 10,
+                "items": {
+                    "type": "object",
+                    "required": ["brand", "news_headline", "news_summary", "idea_text", "platform", "content_type", "rationale"],
+                    "properties": {
+                        "brand":         {"type": "string", "enum": ["BDFit", "MyPacerPro"]},
+                        "news_headline": {"type": "string"},
+                        "news_summary":  {"type": "string"},
+                        "idea_text":     {"type": "string"},
+                        "platform":      {"type": "string", "enum": ["instagram", "tiktok", "youtube", "all"]},
+                        "content_type":  {"type": "string", "enum": ["post", "reel", "short", "story", "carousel"]},
+                        "rationale":     {"type": "string"},
+                    },
+                },
+            }
+        },
+        "required": ["ideas"],
+    },
+}
+
+
 def generate_ideas(articles: list[dict]) -> list[dict]:
     if not ANTHROPIC_API_KEY:
         raise ValueError("ANTHROPIC_API_KEY not set")
@@ -113,32 +143,21 @@ Today's fitness/running/wellness news:
 
 Based on these news stories, generate exactly 10 social media content ideas for BDFit and MyPacerPro.
 Mix ideas between both brands. Each idea should be inspired by or tied to one of the news stories.
-
-Return a JSON array of exactly 10 objects with this structure:
-{{
-  "brand": "BDFit" or "MyPacerPro",
-  "news_headline": "the headline that inspired this idea",
-  "news_summary": "one sentence summary of the news",
-  "idea_text": "the specific content idea — be concrete and creative",
-  "platform": "instagram" or "tiktok" or "youtube" or "all",
-  "content_type": "post" or "reel" or "short" or "story" or "carousel",
-  "rationale": "why this resonates with the brand audience"
-}}
-
-Only return the JSON array, no other text."""
+Call the save_ideas tool with your 10 ideas."""
 
     message = client.messages.create(
-        model="claude-opus-4-7",
-        max_tokens=2048,
+        model="claude-sonnet-4-6",
+        max_tokens=4096,
+        tools=[_IDEAS_TOOL],
+        tool_choice={"type": "tool", "name": "save_ideas"},
         messages=[{"role": "user", "content": prompt}],
     )
 
-    raw = message.content[0].text.strip()
-    if raw.startswith("```"):
-        raw = raw.split("```")[1]
-        if raw.startswith("json"):
-            raw = raw[4:]
-    return json.loads(raw.strip())
+    for block in message.content:
+        if block.type == "tool_use" and block.name == "save_ideas":
+            return block.input["ideas"]
+
+    raise ValueError("No tool_use block returned by Claude")
 
 
 def run_news_scan():

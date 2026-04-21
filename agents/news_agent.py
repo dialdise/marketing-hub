@@ -6,11 +6,23 @@ and generates 10 content ideas saved as 'pending' in the DB.
 """
 
 import os
+import re
 import json
+import traceback
 import httpx
 import anthropic
 from datetime import date
 from db.models import SessionLocal, Idea, NewsScan
+
+
+def _clean(text: str) -> str:
+    if not text:
+        return ""
+    # Remove control characters except tab/newline
+    text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', text)
+    # Drop lone Unicode surrogates (invalid in JSON)
+    text = text.encode('utf-8', errors='replace').decode('utf-8')
+    return text.strip()
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 NEWS_API_KEY = os.getenv("NEWS_API_KEY", "")
@@ -66,14 +78,14 @@ def fetch_news() -> list[dict]:
             )
             data = resp.json()
             for art in data.get("articles", []):
-                title = art.get("title", "")
+                title = _clean(art.get("title", ""))
                 if title and title not in seen_titles:
                     seen_titles.add(title)
                     articles.append({
                         "headline": title,
-                        "description": art.get("description", "") or "",
+                        "description": _clean(art.get("description", "") or ""),
                         "url": art.get("url", ""),
-                        "source": art.get("source", {}).get("name", ""),
+                        "source": _clean(art.get("source", {}).get("name", "")),
                     })
         except Exception as e:
             print(f"[NewsAgent] Error fetching '{query}': {e}")
@@ -201,12 +213,11 @@ def run_news_scan():
         print(f"[NewsAgent] Done — {len(ideas_data)} ideas saved as pending")
 
     except Exception as e:
-        import traceback
         scan.status = "failed"
         scan.error_msg = str(e)
         db.commit()
         print(f"[NewsAgent] Failed: {e}")
-        traceback.print_exc()
+        print(f"[NewsAgent] Traceback:\n{traceback.format_exc()}")
         raise
     finally:
         db.close()

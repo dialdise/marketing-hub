@@ -65,6 +65,9 @@ def fetch_news() -> list[dict]:
             print(f"[NewsAgent] Fetch error '{query}': {e}")
 
     client.close()
+    if len(articles) < 4:
+        print(f"[NewsAgent] Solo {len(articles)} articulos en espanol — usando mock articles")
+        return _mock_articles()
     return articles
 
 
@@ -157,8 +160,10 @@ Reglas: brand debe ser BDFit o MyPacerPro, platform debe ser instagram/tiktok/yo
         messages=[{"role": "user", "content": prompt}],
     )
 
-    raw = message.content[0].text
+    raw = message.content[0].text if message.content else ""
     print(f"[NewsAgent] Raw response length: {len(raw)} chars")
+    if not raw.strip():
+        raise ValueError("Claude devolvio una respuesta vacia")
     ideas = _extract_json(raw)
     print(f"[NewsAgent] Parsed {len(ideas)} ideas")
     return ideas

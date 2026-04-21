@@ -141,11 +141,11 @@ def generate_ideas(articles: list[dict]) -> list[dict]:
     if not ANTHROPIC_API_KEY:
         raise ValueError("ANTHROPIC_API_KEY not set")
 
-    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY, timeout=120.0)
 
     articles_text = "\n".join(
-        f"- [{a['source']}] {a['headline']}: {a['description']}"
-        for a in articles[:15]
+        f"- [{a['source']}] {a['headline']}: {a['description'][:120]}"
+        for a in articles[:10]
     )
 
     prompt = f"""{BRAND_CONTEXT}
@@ -216,7 +216,7 @@ def run_news_scan():
         scan.status = "failed"
         scan.error_msg = str(e)
         db.commit()
-        print(f"[NewsAgent] Failed: {e}")
+        print(f"[NewsAgent] Failed ({type(e).__name__}): {e}")
         print(f"[NewsAgent] Traceback:\n{traceback.format_exc()}")
         raise
     finally:

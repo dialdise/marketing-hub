@@ -201,10 +201,12 @@ def run_news_scan():
         print(f"[NewsAgent] Done — {len(ideas_data)} ideas saved as pending")
 
     except Exception as e:
+        import traceback
         scan.status = "failed"
         scan.error_msg = str(e)
         db.commit()
         print(f"[NewsAgent] Failed: {e}")
+        traceback.print_exc()
         raise
     finally:
         db.close()

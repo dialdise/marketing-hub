@@ -87,12 +87,36 @@ def _extract_json(text: str) -> list:
     m = re.search(r'```(?:json)?\s*([\s\S]*?)```', text)
     if m:
         text = m.group(1).strip()
-    # find the JSON array
+    # find the JSON array boundaries
     start = text.find('[')
     end = text.rfind(']')
-    if start != -1 and end != -1:
-        return json.loads(text[start:end + 1])
-    return json.loads(text)
+    candidate = text[start:end + 1] if start != -1 and end != -1 else text
+    # try direct parse first
+    try:
+        return json.loads(candidate)
+    except json.JSONDecodeError:
+        pass
+    # fix literal newlines/tabs inside JSON string values
+    def fix_string_values(s: str) -> str:
+        result = []
+        in_string = False
+        escape = False
+        for ch in s:
+            if escape:
+                result.append(ch)
+                escape = False
+            elif ch == '\\' and in_string:
+                result.append(ch)
+                escape = True
+            elif ch == '"':
+                result.append(ch)
+                in_string = not in_string
+            elif in_string and ch in ('\n', '\r', '\t'):
+                result.append(' ')
+            else:
+                result.append(ch)
+        return ''.join(result)
+    return json.loads(fix_string_values(candidate))
 
 
 def generate_ideas(articles: list[dict]) -> list[dict]:

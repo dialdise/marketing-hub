@@ -1,6 +1,7 @@
 [build]
-builder = "nixpacks"
+builder = "dockerfile"
 
 [deploy]
-startCommand = "python run.py"
 restartPolicyType = "always"
+healthcheckPath = "/"
+healthcheckTimeout = 30

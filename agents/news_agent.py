@@ -12,20 +12,20 @@ import anthropic
 from datetime import date
 from db.models import SessionLocal, Idea, NewsScan
 
-VERSION = "v7-plain-text"
+VERSION = "v9-spanish"
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 NEWS_API_KEY = os.getenv("NEWS_API_KEY", "")
 
-BRAND_CONTEXT = """You are a marketing strategist for two fitness brands:
-1. BDFit (@bdfitindahouse) - gym/fitness lifestyle, motivational tone
-2. MyPacerPro (@mypacerpro) - running performance app, data-driven tone"""
+BRAND_CONTEXT = """Eres estratega de marketing para dos marcas de fitness:
+1. BDFit (@bdfitindahouse) - gimnasio/estilo de vida fitness, tono motivacional en espanol
+2. MyPacerPro (@mypacerpro) - app de rendimiento para corredores, tono tecnico y motivador en espanol"""
 
 NEWS_QUERIES = [
-    "fitness gym workout trends",
-    "running marathon training tips",
-    "sports nutrition health",
-    "wellness mental health exercise",
+    "fitness gimnasio ejercicio tendencias",
+    "running maraton entrenamiento consejos",
+    "nutricion deportiva salud",
+    "bienestar salud mental ejercicio",
 ]
 
 
@@ -50,7 +50,7 @@ def fetch_news() -> list[dict]:
         try:
             resp = client.get(
                 "https://newsapi.org/v2/everything",
-                params={"q": query, "language": "en", "sortBy": "publishedAt", "pageSize": 4, "apiKey": NEWS_API_KEY},
+                params={"q": query, "language": "es", "sortBy": "publishedAt", "pageSize": 4, "apiKey": NEWS_API_KEY},
             )
             for art in resp.json().get("articles", []):
                 title = _clean(art.get("title", ""))
@@ -70,14 +70,14 @@ def fetch_news() -> list[dict]:
 
 def _mock_articles() -> list[dict]:
     return [
-        {"headline": "High-Protein Diets Reshape Gym Culture", "description": "Protein timing matters more than total intake for muscle gains.", "source": "FitnessToday"},
-        {"headline": "Elite Athletes Train Smarter with Polarized Models", "description": "Top marathon runners shift to polarized training for peak performance.", "source": "RunnerWorld"},
-        {"headline": "TikTok Fitness Trends Drive Gym Memberships Up 30%", "description": "Short-form video is the top driver of new gym sign-ups.", "source": "SportsBusiness"},
-        {"headline": "VO2 Max Tracking Goes Mainstream with Wearables", "description": "Consumer devices now deliver lab-quality metrics to everyday runners.", "source": "TechSport"},
-        {"headline": "Exercise Reduces Anxiety by 48% New Study Shows", "description": "Regular cardio confirmed to significantly reduce anxiety levels.", "source": "HealthLine"},
-        {"headline": "Functional Fitness Overtakes Traditional Weightlifting", "description": "CrossFit-style movements replacing isolated machine exercises.", "source": "GymInsider"},
-        {"headline": "Marathon Participation Hits Record 2 Million Runners", "description": "Post-pandemic high in road race registrations globally.", "source": "RunnerWorld"},
-        {"headline": "Sleep Quality Ranked Above Nutrition by Elite Coaches", "description": "Recovery protocols now prioritize sleep optimization.", "source": "SportsSci"},
+        {"headline": "Dietas altas en proteinas transforman la cultura del gimnasio", "description": "El momento de consumo de proteinas importa mas que la cantidad total para ganar musculo.", "source": "FitnessHoy"},
+        {"headline": "Atletas de elite entrenan con modelos polarizados", "description": "Los mejores maratonistas adoptan el entrenamiento polarizado para rendir al maximo.", "source": "MundoRunner"},
+        {"headline": "TikTok fitness dispara membresias en gimnasios un 30%", "description": "El video corto es el principal motor de nuevas inscripciones en gimnasios.", "source": "DeporteNegocios"},
+        {"headline": "El seguimiento de VO2 Max llega a dispositivos para todos", "description": "Los wearables de consumo ahora ofrecen metricas de calidad de laboratorio.", "source": "TechDeporte"},
+        {"headline": "El ejercicio reduce la ansiedad un 48% segun nuevo estudio", "description": "El cardio regular reduce significativamente los niveles de ansiedad.", "source": "SaludLine"},
+        {"headline": "El fitness funcional supera al levantamiento tradicional", "description": "Los movimientos estilo CrossFit reemplazan las maquinas en los gimnasios modernos.", "source": "GimInsider"},
+        {"headline": "Participacion en maratones alcanza record de 2 millones de corredores", "description": "Maximo historico en inscripciones a carreras de ruta a nivel mundial.", "source": "MundoRunner"},
+        {"headline": "La calidad del sueno supera a la nutricion para entrenadores de elite", "description": "Los protocolos de recuperacion priorizan la optimizacion del sueno.", "source": "CienciaDeporte"},
     ]
 
 
@@ -132,23 +132,23 @@ def generate_ideas(articles: list[dict]) -> list[dict]:
 
     prompt = f"""{BRAND_CONTEXT}
 
-News headlines:
+Noticias de hoy:
 {articles_text}
 
-Generate exactly 10 content ideas. Return ONLY a JSON array, no other text:
+Genera exactamente 10 ideas de contenido en ESPANOL para redes sociales. Devuelve SOLO un array JSON, sin texto adicional:
 [
   {{
     "brand": "BDFit",
-    "news_headline": "headline that inspired this",
-    "news_summary": "one sentence",
-    "idea_text": "concrete content idea",
+    "news_headline": "titular que inspiro esta idea",
+    "news_summary": "resumen en una oracion",
+    "idea_text": "idea de contenido concreta en espanol",
     "platform": "instagram",
     "content_type": "reel",
-    "rationale": "why it works"
+    "rationale": "por que funciona para la audiencia"
   }}
 ]
 
-Rules: brand must be BDFit or MyPacerPro, platform must be instagram/tiktok/youtube/all, content_type must be post/reel/short/story/carousel. Return ONLY the JSON array."""
+Reglas: brand debe ser BDFit o MyPacerPro, platform debe ser instagram/tiktok/youtube/all, content_type debe ser post/reel/short/story/carousel. Todo el contenido en ESPANOL. Devuelve SOLO el array JSON."""
 
     print(f"[NewsAgent] Calling Claude API ({VERSION})...")
     message = client.messages.create(

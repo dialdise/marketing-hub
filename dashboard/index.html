@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Marketing Hub — BDFit & MyPacerPro</title>
+<meta name="description" content="Hub de Marketing para BDFit y MyPacerPro"/>
 <style>
   :root {
     --bg: #0d0d0f;
@@ -474,8 +475,8 @@
   </div>
   <div class="header-right">
     <span class="lima-time" id="limaTime">Lima: --:--</span>
-    <span class="next-scan" id="nextScan">Next scan: loading…</span>
-    <button class="btn btn-trigger" onclick="triggerScan()">⚡ Run Scan Now</button>
+    <span class="next-scan" id="nextScan">Proximo escaneo: cargando…</span>
+    <button class="btn btn-trigger" onclick="triggerScan()">⚡ Escanear Ahora</button>
   </div>
 </header>
 
@@ -483,27 +484,27 @@
 <div class="stats-bar">
   <div class="stat-card">
     <div class="stat-value c-pending" id="statPending">–</div>
-    <div class="stat-label">Pending Ideas</div>
+    <div class="stat-label">Ideas Pendientes</div>
   </div>
   <div class="stat-card">
     <div class="stat-value c-approved" id="statApproved">–</div>
-    <div class="stat-label">Approved</div>
+    <div class="stat-label">Aprobadas</div>
   </div>
   <div class="stat-card">
     <div class="stat-value c-red" id="statRejected">–</div>
-    <div class="stat-label">Rejected</div>
+    <div class="stat-label">Rechazadas</div>
   </div>
   <div class="stat-card">
     <div class="stat-value c-review" id="statReview">–</div>
-    <div class="stat-label">Under Review</div>
+    <div class="stat-label">En Revision</div>
   </div>
   <div class="stat-card">
     <div class="stat-value c-content" id="statContentApproved">–</div>
-    <div class="stat-label">Content Ready</div>
+    <div class="stat-label">Contenido Listo</div>
   </div>
   <div class="stat-card">
     <div class="stat-value" id="statScans" style="color:var(--muted)">–</div>
-    <div class="stat-label">Total Scans</div>
+    <div class="stat-label">Escaneos Totales</div>
   </div>
 </div>
 
@@ -512,12 +513,12 @@
   <!-- Left: Ideas -->
   <div class="panel">
     <div class="panel-header">
-      <span class="panel-title">💡 Content Ideas</span>
+      <span class="panel-title">💡 Ideas de Contenido</span>
       <div class="panel-actions">
-        <button class="tab-btn active" onclick="setIdeasTab('pending', this)">Pending</button>
-        <button class="tab-btn" onclick="setIdeasTab('approved', this)">Approved</button>
-        <button class="tab-btn" onclick="setIdeasTab('rejected', this)">Rejected</button>
-        <button class="tab-btn" onclick="setIdeasTab('all', this)">All</button>
+        <button class="tab-btn active" onclick="setIdeasTab('pending', this)">Pendientes</button>
+        <button class="tab-btn" onclick="setIdeasTab('approved', this)">Aprobadas</button>
+        <button class="tab-btn" onclick="setIdeasTab('rejected', this)">Rechazadas</button>
+        <button class="tab-btn" onclick="setIdeasTab('all', this)">Todas</button>
       </div>
     </div>
     <div class="panel-body" id="ideasPanel">
@@ -528,11 +529,11 @@
   <!-- Right: Content -->
   <div class="panel">
     <div class="panel-header">
-      <span class="panel-title">✍️ Content Queue</span>
+      <span class="panel-title">✍️ Cola de Contenido</span>
       <div class="panel-actions">
-        <button class="tab-btn active" onclick="setContentTab('underreview', this)">Under Review</button>
-        <button class="tab-btn" onclick="setContentTab('approved', this)">Approved</button>
-        <button class="tab-btn" onclick="setContentTab('all', this)">All</button>
+        <button class="tab-btn active" onclick="setContentTab('underreview', this)">En Revision</button>
+        <button class="tab-btn" onclick="setContentTab('approved', this)">Aprobado</button>
+        <button class="tab-btn" onclick="setContentTab('all', this)">Todo</button>
       </div>
     </div>
     <div class="panel-body" id="contentPanel">
@@ -569,7 +570,7 @@ async function loadStats() {
     document.getElementById('limaTime').textContent = 'Lima: ' + s.lima_time.slice(11, 16);
     if (s.next_scan) {
       const d = new Date(s.next_scan);
-      document.getElementById('nextScan').textContent = 'Next scan: ' + d.toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+      document.getElementById('nextScan').textContent = 'Proximo: ' + d.toLocaleString('es-PE', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
     }
   } catch(e) {}
 }
@@ -589,7 +590,7 @@ async function loadIdeas() {
   try {
     const ideas = await api(`/api/ideas?status=${ideasTab}&limit=100`);
     if (!ideas.length) {
-      panel.innerHTML = `<div class="empty"><div class="empty-icon">💡</div>No ${ideasTab} ideas yet.<br>Run a news scan to generate ideas.</div>`;
+      panel.innerHTML = `<div class="empty"><div class="empty-icon">💡</div>No hay ideas ${ideasTab} aun.<br>Ejecuta un escaneo para generar ideas.</div>`;
       return;
     }
     panel.innerHTML = ideas.map(renderIdea).join('');
@@ -602,13 +603,13 @@ function renderIdea(idea) {
   const isPending = idea.status === 'pending';
   const actions = isPending ? `
     <div class="idea-actions">
-      <button class="btn btn-approve" onclick="approveIdea(${idea.id})">✓ Approve</button>
-      <button class="btn btn-reject" onclick="rejectIdea(${idea.id})">✗ Reject</button>
+      <button class="btn btn-approve" onclick="approveIdea(${idea.id})">✓ Aprobar</button>
+      <button class="btn btn-reject" onclick="rejectIdea(${idea.id})">✗ Rechazar</button>
     </div>` : `
     <div class="idea-actions">
       <span class="status-chip status-${idea.status}">${idea.status}</span>
-      ${idea.status === 'approved' && idea.has_content ? '<span style="font-size:11px;color:var(--green);margin-left:8px;">✓ Content generated</span>' : ''}
-      ${idea.status === 'approved' && !idea.has_content ? '<span style="font-size:11px;color:var(--yellow);margin-left:8px;">⏳ Generating…</span>' : ''}
+      ${idea.status === 'approved' && idea.has_content ? '<span style="font-size:11px;color:var(--green);margin-left:8px;">✓ Contenido generado</span>' : ''}
+      ${idea.status === 'approved' && !idea.has_content ? '<span style="font-size:11px;color:var(--yellow);margin-left:8px;">⏳ Generando…</span>' : ''}
     </div>`;
 
   const newsBlurb = idea.news_headline
@@ -634,7 +635,7 @@ async function approveIdea(id) {
   card.style.opacity = '.5';
   try {
     await api(`/api/ideas/${id}/approve`, 'POST');
-    toast('✓ Approved — generating content…', 'success');
+    toast('✓ Aprobada — generando contenido…', 'success');
     await loadIdeas();
     await loadStats();
     setTimeout(() => { loadContent(); loadStats(); }, 8000);
@@ -647,7 +648,7 @@ async function approveIdea(id) {
 async function rejectIdea(id) {
   try {
     await api(`/api/ideas/${id}/reject`, 'POST');
-    toast('Rejected', 'info');
+    toast('Rechazada', 'info');
     await loadIdeas();
     await loadStats();
   } catch(e) {
@@ -670,7 +671,7 @@ async function loadContent() {
   try {
     const items = await api(`/api/content?status=${contentTab}&limit=100`);
     if (!items.length) {
-      panel.innerHTML = `<div class="empty"><div class="empty-icon">✍️</div>No ${contentTab} content yet.<br>Approve ideas to generate content.</div>`;
+      panel.innerHTML = `<div class="empty"><div class="empty-icon">✍️</div>No hay contenido ${contentTab} aun.<br>Aprueba ideas para generar contenido.</div>`;
       return;
     }
     panel.innerHTML = items.map(renderContent).join('');
@@ -693,8 +694,8 @@ function renderContent(c) {
     </div>` : '';
 
   const approveBtn = c.status === 'underreview'
-    ? `<button class="btn btn-content-approve" onclick="approveContent(${c.id})">✓ Approve Content</button>`
-    : `<span class="status-chip status-approved">Approved</span>`;
+    ? `<button class="btn btn-content-approve" onclick="approveContent(${c.id})">✓ Aprobar Contenido</button>`
+    : `<span class="status-chip status-approved">Aprobado</span>`;
 
   return `
 <div class="content-card ${c.status}" id="content-${c.id}">
@@ -706,12 +707,12 @@ function renderContent(c) {
   </div>
 
   <div class="content-section">
-    <div class="content-label">Hook</div>
+    <div class="content-label">Gancho</div>
     <div class="content-value content-hook">${escHtml(c.hook)}</div>
   </div>
 
   <div class="content-section">
-    <div class="content-label">Caption / Copy</div>
+    <div class="content-label">Caption / Texto</div>
     <div class="content-value">${escHtml(c.copy_text)}</div>
   </div>
 
@@ -719,12 +720,12 @@ function renderContent(c) {
   ${visualSection}
 
   <div class="content-section">
-    <div class="content-label">CTA</div>
+    <div class="content-label">Llamada a la Accion</div>
     <div class="content-value" style="color:var(--yellow);">${escHtml(c.cta)}</div>
   </div>
 
   <div class="content-section">
-    <div class="content-label">Hashtags</div>
+    <div class="content-label">Hashtags</div>  <!-- same in Spanish -->
     <div class="content-hashtags">${escHtml(c.hashtags)}</div>
   </div>
 
@@ -741,7 +742,7 @@ function toggleScript(btn) {
 async function approveContent(id) {
   try {
     await api(`/api/content/${id}/approve`, 'POST');
-    toast('Content approved!', 'success');
+    toast('¡Contenido aprobado!', 'success');
     await loadContent();
     await loadStats();
   } catch(e) {
@@ -754,18 +755,18 @@ async function approveContent(id) {
 async function triggerScan() {
   const btn = document.querySelector('.btn-trigger');
   btn.disabled = true;
-  btn.textContent = '⏳ Scanning…';
+  btn.textContent = '⏳ Escaneando…';
   try {
     await api('/api/trigger/news-scan', 'POST');
-    toast('⚡ Scan started — polling for results…', 'info');
+    toast('⚡ Escaneo iniciado…', 'info');
     const panel = document.getElementById('ideasPanel');
-    panel.innerHTML = '<div class="spinner">⏳ Scan in progress — fetching news &amp; generating ideas with Claude…</div>';
+    panel.innerHTML = '<div class="spinner">⏳ Escaneo en curso — buscando noticias y generando ideas con Claude…</div>';
     await pollForScanCompletion();
   } catch(e) {
     toast('Error: ' + e.message, 'error');
   } finally {
     btn.disabled = false;
-    btn.textContent = '⚡ Run Scan Now';
+    btn.textContent = '⚡ Escanear Ahora';
   }
 }
 
@@ -784,7 +785,7 @@ async function pollForScanCompletion() {
     const interval = setInterval(async () => {
       if (Date.now() - startTime > timeout) {
         clearInterval(interval);
-        toast('Scan is taking longer than expected — check back soon', 'info');
+        toast('El escaneo tarda mas de lo esperado — revisa pronto', 'info');
         await loadIdeas();
         await loadStats();
         resolve();
@@ -797,13 +798,13 @@ async function pollForScanCompletion() {
         if (latest.id === lastScanId) return; // scan not started yet
         if (latest.status === 'success') {
           clearInterval(interval);
-          toast(`✅ Scan done — ${latest.ideas_generated} ideas generated!`, 'success');
+          toast(`✅ Escaneo listo — ${latest.ideas_generated} ideas generadas!`, 'success');
           await loadIdeas();
           await loadStats();
           resolve();
         } else if (latest.status === 'failed') {
           clearInterval(interval);
-          toast('❌ Scan failed: ' + (latest.error_msg || 'unknown error'), 'error');
+          toast('❌ Error en escaneo: ' + (latest.error_msg || 'error desconocido'), 'error');
           await loadIdeas();
           resolve();
         }

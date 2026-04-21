@@ -12,23 +12,23 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 
 BRAND_VOICES = {
     "BDFit": {
-        "voice": "Energetic, motivational, raw, community-driven. Uses gym slang naturally. Speaks to people who live for the grind.",
-        "hashtags": "#BDFit #GymLife #FitnessMotivation #GymCommunity #WorkoutLife #FitFam #BodyTransformation #GainsGang",
+        "voice": "Energetico, motivacional, autentico, comunidad. Usa jerga de gimnasio naturalmente. Habla a personas que viven para entrenar. TODO EN ESPANOL.",
+        "hashtags": "#BDFit #VidaGym #MotivaciónFitness #ComunidadFit #EntrenamientoReal #FitFam #TransformacionCorporal #GanasMuscular",
         "account": "@bdfitindahouse",
     },
     "MyPacerPro": {
-        "voice": "Performance-focused, data-driven, encouraging. Speaks like a knowledgeable coach who ran marathons. Technical but accessible.",
-        "hashtags": "#MyPacerPro #RunningCommunity #MarathonTraining #RunnerLife #RaceDay #TrainingRun #PaceYourself #RunMore",
+        "voice": "Orientado al rendimiento, basado en datos, motivador. Habla como un coach experto que ha corrido maratones. Tecnico pero accesible. TODO EN ESPANOL.",
+        "hashtags": "#MyPacerPro #ComunidadRunner #EntrenamientoMaraton #VidaRunner #DiaDeCabrera #RutaDiaria #RitmoTuyo #CorrerMas",
         "account": "@mypacerpro",
     },
 }
 
 CONTENT_TEMPLATES = {
-    "post": "static image with caption",
-    "reel": "15-60 second vertical video with audio/music",
-    "short": "YouTube Short under 60 seconds",
-    "story": "24-hour ephemeral story with interactive elements",
-    "carousel": "swipe-through series of 5-10 slides",
+    "post": "imagen estatica con caption",
+    "reel": "video vertical de 15-60 segundos con audio/musica",
+    "short": "YouTube Short menor a 60 segundos",
+    "story": "historia efimera de 24 horas con elementos interactivos",
+    "carousel": "serie de 5-10 diapositivas deslizables",
 }
 
 
@@ -44,28 +44,28 @@ def build_content_prompt(idea: Idea, brand: str) -> str:
     bv = BRAND_VOICES[brand]
     content_format = CONTENT_TEMPLATES.get(idea.content_type, "post")
 
-    base = f"""You are the content writer for {brand} ({bv['account']}).
-Brand voice: {bv['voice']}
-Default hashtags: {bv['hashtags']}
+    base = f"""Eres el redactor de contenido para {brand} ({bv['account']}).
+Voz de marca: {bv['voice']}
+Hashtags base: {bv['hashtags']}
 
-Content idea to execute:
+Idea de contenido a ejecutar:
 "{idea.idea_text}"
 
-Inspired by: {idea.news_headline}
-Platform: {idea.platform}
-Format: {idea.content_type} ({content_format})
+Inspirado en: {idea.news_headline}
+Plataforma: {idea.platform}
+Formato: {idea.content_type} ({content_format})
 
-Write production-ready content. Return a JSON object with:
+Escribe contenido listo para publicar EN ESPANOL. Devuelve SOLO un objeto JSON:
 {{
-  "hook": "the opening line or first 3 seconds of video — must stop the scroll",
-  "copy_text": "full caption / body text with line breaks and emojis where natural",
-  "script": "step-by-step video script with timestamps (only for reel/short/story, else null)",
-  "hashtags": "30 relevant hashtags as a single string separated by spaces",
-  "cta": "clear call to action at the end",
-  "visual_notes": "specific directions for the creative team — colors, on-screen text, b-roll, transitions, music mood"
+  "hook": "primera linea o primeros 3 segundos del video — debe detener el scroll",
+  "copy_text": "caption completo con saltos de linea y emojis donde sea natural",
+  "script": "guion paso a paso con tiempos (solo para reel/short/story, sino null)",
+  "hashtags": "30 hashtags relevantes como una sola cadena separada por espacios",
+  "cta": "llamada a la accion clara al final",
+  "visual_notes": "instrucciones especificas para el equipo creativo — colores, texto en pantalla, b-roll, transiciones, mood musical"
 }}
 
-Only return the JSON object, no other text."""
+Devuelve SOLO el objeto JSON, sin texto adicional."""
 
     return base
 

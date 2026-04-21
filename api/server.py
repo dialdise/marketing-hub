@@ -61,7 +61,7 @@ def get_stats():
             "total_scans": db.query(NewsScan).count(),
             "next_scan": next_scan.isoformat() if next_scan else None,
             "lima_time": now_lima.strftime("%Y-%m-%d %H:%M:%S"),
-            "deploy_version": "v8",
+            "deploy_version": "v9",
         }
     finally:
         db.close()

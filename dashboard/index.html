@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Marketing Hub — BDFit & MyPacerPro</title>
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #17171a;
+    --surface2: #1f1f24;
+    --border: #2a2a30;
+    --accent1: #ff4d4d;   /* BDFit red */
+    --accent2: #00c6ff;   /* MyPacerPro blue */
+    --green: #22c55e;
+    --yellow: #f59e0b;
+    --purple: #a855f7;
+    --text: #f0f0f5;
+    --muted: #7a7a8a;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .brands {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .brand-badge {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 20px;
+    letter-spacing: .5px;
+  }
+
+  .brand-bdfit { background: rgba(255,77,77,.15); color: var(--accent1); border: 1px solid rgba(255,77,77,.3); }
+  .brand-pacer { background: rgba(0,198,255,.12); color: var(--accent2); border: 1px solid rgba(0,198,255,.3); }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .lima-time {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .next-scan {
+    font-size: 12px;
+    color: var(--green);
+    background: rgba(34,197,94,.1);
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(34,197,94,.2);
+  }
+
+  /* ── Stats row ── */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .6px;
+  }
+
+  .c-pending { color: var(--yellow); }
+  .c-approved { color: var(--green); }
+  .c-review { color: var(--accent2); }
+  .c-content { color: var(--purple); }
+  .c-red { color: var(--accent1); }
+
+  /* ── Main layout ── */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    height: calc(100vh - 130px);
+  }
+
+  .panel {
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel:last-child { border-right: none; }
+
+  .panel-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .panel-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+  }
+
+  .panel-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .tab-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 4px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all .15s;
+  }
+
+  .tab-btn.active, .tab-btn:hover {
+    background: var(--surface2);
+    color: var(--text);
+    border-color: var(--border);
+  }
+
+  .panel-body {
+    overflow-y: auto;
+    flex: 1;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* ── Idea cards ── */
+  .idea-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    transition: border-color .15s;
+  }
+
+  .idea-card:hover { border-color: #3a3a46; }
+
+  .idea-card.approved { border-left: 3px solid var(--green); }
+  .idea-card.rejected { border-left: 3px solid var(--accent1); opacity: .6; }
+
+  .idea-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+
+  .tag-instagram { background: rgba(228,64,95,.15); color: #e4405f; }
+  .tag-tiktok    { background: rgba(0,242,234,.12); color: #00f2ea; }
+  .tag-youtube   { background: rgba(255,0,0,.12); color: #ff4444; }
+  .tag-all       { background: rgba(168,85,247,.15); color: var(--purple); }
+  .tag-post      { background: rgba(255,255,255,.06); color: var(--muted); }
+  .tag-reel      { background: rgba(255,77,77,.1); color: var(--accent1); }
+  .tag-short     { background: rgba(0,198,255,.1); color: var(--accent2); }
+  .tag-story     { background: rgba(245,158,11,.1); color: var(--yellow); }
+  .tag-carousel  { background: rgba(34,197,94,.1); color: var(--green); }
+
+  .news-source {
+    font-size: 11px;
+    color: var(--muted);
+    flex: 1;
+    text-align: right;
+  }
+
+  .idea-text {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .idea-rationale {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.4;
+    margin-bottom: 12px;
+    font-style: italic;
+  }
+
+  .idea-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn {
+    border: none;
+    border-radius: 8px;
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .15s, transform .1s;
+  }
+
+  .btn:active { transform: scale(.97); }
+  .btn:disabled { opacity: .4; cursor: default; }
+
+  .btn-approve {
+    background: var(--green);
+    color: #000;
+    flex: 1;
+  }
+
+  .btn-reject {
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    flex: 1;
+  }
+
+  .btn-reject:hover { color: var(--accent1); border-color: var(--accent1); }
+
+  .btn-trigger {
+    background: var(--accent2);
+    color: #000;
+    font-size: 12px;
+    padding: 5px 14px;
+  }
+
+  .btn-trigger:hover { opacity: .85; }
+
+  .status-chip {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+
+  .status-pending   { background: rgba(245,158,11,.15); color: var(--yellow); }
+  .status-approved  { background: rgba(34,197,94,.15); color: var(--green); }
+  .status-rejected  { background: rgba(255,77,77,.1); color: var(--accent1); }
+  .status-underreview { background: rgba(0,198,255,.12); color: var(--accent2); }
+
+  /* ── Content cards ── */
+  .content-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+
+  .content-card.approved { border-left-color: var(--green); }
+
+  .content-idea-ref {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    font-style: italic;
+  }
+
+  .content-section {
+    margin-bottom: 10px;
+  }
+
+  .content-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    margin-bottom: 4px;
+  }
+
+  .content-value {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+
+  .content-hook {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent2);
+    line-height: 1.3;
+  }
+
+  .content-hashtags {
+    font-size: 12px;
+    color: var(--purple);
+    word-break: break-all;
+  }
+
+  .content-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .btn-content-approve {
+    background: var(--green);
+    color: #000;
+    flex: 1;
+  }
+
+  /* ── Collapsible script ── */
+  .collapsible-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 11px;
+    margin-bottom: 6px;
+  }
+
+  .collapsible-toggle:hover { color: var(--text); border-color: var(--border); }
+
+  .collapsible-body {
+    display: none;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .collapsible-body.open { display: block; }
+
+  /* ── Empty state ── */
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 60px 20px;
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  .empty-icon { font-size: 36px; margin-bottom: 12px; }
+
+  /* ── Spinner ── */
+  .spinner {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+  }
+
+  /* ── Scan log ── */
+  .scan-log {
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .scan-ok { color: var(--green); }
+  .scan-fail { color: var(--accent1); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-size: 13px;
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all .2s;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .toast.success { border-color: var(--green); color: var(--green); }
+  .toast.info    { border-color: var(--accent2); color: var(--accent2); }
+  .toast.error   { border-color: var(--accent1); color: var(--accent1); }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; height: auto; }
+    .panel { min-height: 60vh; }
+    .stats-bar { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="brands">
+    <span style="font-weight:800;font-size:16px;">Marketing Hub</span>
+    <span class="brand-badge brand-bdfit">BDFit</span>
+    <span class="brand-badge brand-pacer">MyPacerPro</span>
+  </div>
+  <div class="header-right">
+    <span class="lima-time" id="limaTime">Lima: --:--</span>
+    <span class="next-scan" id="nextScan">Next scan: loading…</span>
+    <button class="btn btn-trigger" onclick="triggerScan()">⚡ Run Scan Now</button>
+  </div>
+</header>
+
+<!-- Stats -->
+<div class="stats-bar">
+  <div class="stat-card">
+    <div class="stat-value c-pending" id="statPending">–</div>
+    <div class="stat-label">Pending Ideas</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value c-approved" id="statApproved">–</div>
+    <div class="stat-label">Approved</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value c-red" id="statRejected">–</div>
+    <div class="stat-label">Rejected</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value c-review" id="statReview">–</div>
+    <div class="stat-label">Under Review</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value c-content" id="statContentApproved">–</div>
+    <div class="stat-label">Content Ready</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" id="statScans" style="color:var(--muted)">–</div>
+    <div class="stat-label">Total Scans</div>
+  </div>
+</div>
+
+<!-- Main panels -->
+<div class="main">
+  <!-- Left: Ideas -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">💡 Content Ideas</span>
+      <div class="panel-actions">
+        <button class="tab-btn active" onclick="setIdeasTab('pending', this)">Pending</button>
+        <button class="tab-btn" onclick="setIdeasTab('approved', this)">Approved</button>
+        <button class="tab-btn" onclick="setIdeasTab('rejected', this)">Rejected</button>
+        <button class="tab-btn" onclick="setIdeasTab('all', this)">All</button>
+      </div>
+    </div>
+    <div class="panel-body" id="ideasPanel">
+      <div class="spinner">Loading ideas…</div>
+    </div>
+  </div>
+
+  <!-- Right: Content -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">✍️ Content Queue</span>
+      <div class="panel-actions">
+        <button class="tab-btn active" onclick="setContentTab('underreview', this)">Under Review</button>
+        <button class="tab-btn" onclick="setContentTab('approved', this)">Approved</button>
+        <button class="tab-btn" onclick="setContentTab('all', this)">All</button>
+      </div>
+    </div>
+    <div class="panel-body" id="contentPanel">
+      <div class="spinner">Loading content…</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let ideasTab = 'pending';
+let contentTab = 'underreview';
+
+// ── Fetch helpers ──────────────────────────────────────────────────────────
+
+async function api(path, method='GET') {
+  const r = await fetch(path, { method });
+  if (!r.ok) throw new Error(`${method} ${path} → ${r.status}`);
+  return r.json();
+}
+
+// ── Stats ──────────────────────────────────────────────────────────────────
+
+async function loadStats() {
+  try {
+    const s = await api('/api/stats');
+    document.getElementById('statPending').textContent = s.pending_ideas;
+    document.getElementById('statApproved').textContent = s.approved_ideas;
+    document.getElementById('statRejected').textContent = s.rejected_ideas;
+    document.getElementById('statReview').textContent = s.content_underreview;
+    document.getElementById('statContentApproved').textContent = s.content_approved;
+    document.getElementById('statScans').textContent = s.total_scans;
+    document.getElementById('limaTime').textContent = 'Lima: ' + s.lima_time.slice(11, 16);
+    if (s.next_scan) {
+      const d = new Date(s.next_scan);
+      document.getElementById('nextScan').textContent = 'Next scan: ' + d.toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+    }
+  } catch(e) {}
+}
+
+// ── Ideas ──────────────────────────────────────────────────────────────────
+
+function setIdeasTab(tab, btn) {
+  ideasTab = tab;
+  document.querySelectorAll('.panel:first-child .tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadIdeas();
+}
+
+async function loadIdeas() {
+  const panel = document.getElementById('ideasPanel');
+  panel.innerHTML = '<div class="spinner">Loading…</div>';
+  try {
+    const ideas = await api(`/api/ideas?status=${ideasTab}&limit=100`);
+    if (!ideas.length) {
+      panel.innerHTML = `<div class="empty"><div class="empty-icon">💡</div>No ${ideasTab} ideas yet.<br>Run a news scan to generate ideas.</div>`;
+      return;
+    }
+    panel.innerHTML = ideas.map(renderIdea).join('');
+  } catch(e) {
+    panel.innerHTML = `<div class="empty">Error loading ideas: ${e.message}</div>`;
+  }
+}
+
+function renderIdea(idea) {
+  const isPending = idea.status === 'pending';
+  const actions = isPending ? `
+    <div class="idea-actions">
+      <button class="btn btn-approve" onclick="approveIdea(${idea.id})">✓ Approve</button>
+      <button class="btn btn-reject" onclick="rejectIdea(${idea.id})">✗ Reject</button>
+    </div>` : `
+    <div class="idea-actions">
+      <span class="status-chip status-${idea.status}">${idea.status}</span>
+      ${idea.status === 'approved' && idea.has_content ? '<span style="font-size:11px;color:var(--green);margin-left:8px;">✓ Content generated</span>' : ''}
+      ${idea.status === 'approved' && !idea.has_content ? '<span style="font-size:11px;color:var(--yellow);margin-left:8px;">⏳ Generating…</span>' : ''}
+    </div>`;
+
+  const newsBlurb = idea.news_headline
+    ? `<div style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:6px 10px;background:rgba(255,255,255,.04);border-radius:6px;border-left:2px solid var(--border)">📰 ${idea.news_headline}</div>`
+    : '';
+
+  return `
+<div class="idea-card ${idea.status}" id="idea-${idea.id}">
+  <div class="idea-meta">
+    <span class="tag tag-${idea.platform}">${idea.platform}</span>
+    <span class="tag tag-${idea.content_type}">${idea.content_type}</span>
+    <span class="news-source">${idea.scan_date || ''}</span>
+  </div>
+  ${newsBlurb}
+  <div class="idea-text">${escHtml(idea.idea_text)}</div>
+  ${idea.rationale ? `<div class="idea-rationale">${escHtml(idea.rationale)}</div>` : ''}
+  ${actions}
+</div>`;
+}
+
+async function approveIdea(id) {
+  const card = document.getElementById(`idea-${id}`);
+  card.style.opacity = '.5';
+  try {
+    await api(`/api/ideas/${id}/approve`, 'POST');
+    toast('✓ Approved — generating content…', 'success');
+    await loadIdeas();
+    await loadStats();
+    setTimeout(() => { loadContent(); loadStats(); }, 8000);
+  } catch(e) {
+    card.style.opacity = '1';
+    toast('Error: ' + e.message, 'error');
+  }
+}
+
+async function rejectIdea(id) {
+  try {
+    await api(`/api/ideas/${id}/reject`, 'POST');
+    toast('Rejected', 'info');
+    await loadIdeas();
+    await loadStats();
+  } catch(e) {
+    toast('Error: ' + e.message, 'error');
+  }
+}
+
+// ── Content ────────────────────────────────────────────────────────────────
+
+function setContentTab(tab, btn) {
+  contentTab = tab;
+  document.querySelectorAll('.panel:last-child .tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadContent();
+}
+
+async function loadContent() {
+  const panel = document.getElementById('contentPanel');
+  panel.innerHTML = '<div class="spinner">Loading…</div>';
+  try {
+    const items = await api(`/api/content?status=${contentTab}&limit=100`);
+    if (!items.length) {
+      panel.innerHTML = `<div class="empty"><div class="empty-icon">✍️</div>No ${contentTab} content yet.<br>Approve ideas to generate content.</div>`;
+      return;
+    }
+    panel.innerHTML = items.map(renderContent).join('');
+  } catch(e) {
+    panel.innerHTML = `<div class="empty">Error: ${e.message}</div>`;
+  }
+}
+
+function renderContent(c) {
+  const scriptSection = c.script ? `
+    <div class="content-section">
+      <button class="collapsible-toggle" onclick="toggleScript(this)">▶ Show Script</button>
+      <div class="collapsible-body">${escHtml(c.script)}</div>
+    </div>` : '';
+
+  const visualSection = c.visual_notes ? `
+    <div class="content-section">
+      <button class="collapsible-toggle" onclick="toggleScript(this)">🎨 Visual Notes</button>
+      <div class="collapsible-body">${escHtml(c.visual_notes)}</div>
+    </div>` : '';
+
+  const approveBtn = c.status === 'underreview'
+    ? `<button class="btn btn-content-approve" onclick="approveContent(${c.id})">✓ Approve Content</button>`
+    : `<span class="status-chip status-approved">Approved</span>`;
+
+  return `
+<div class="content-card ${c.status}" id="content-${c.id}">
+  <div class="content-idea-ref">From: "${escHtml(c.idea_text.slice(0, 80))}${c.idea_text.length > 80 ? '…' : ''}"</div>
+  <div class="idea-meta" style="margin-bottom:10px;">
+    <span class="tag tag-${c.platform}">${c.platform}</span>
+    <span class="tag tag-${c.content_type}">${c.content_type}</span>
+    <span class="status-chip status-${c.status}" style="margin-left:auto;">${c.status}</span>
+  </div>
+
+  <div class="content-section">
+    <div class="content-label">Hook</div>
+    <div class="content-value content-hook">${escHtml(c.hook)}</div>
+  </div>
+
+  <div class="content-section">
+    <div class="content-label">Caption / Copy</div>
+    <div class="content-value">${escHtml(c.copy_text)}</div>
+  </div>
+
+  ${scriptSection}
+  ${visualSection}
+
+  <div class="content-section">
+    <div class="content-label">CTA</div>
+    <div class="content-value" style="color:var(--yellow);">${escHtml(c.cta)}</div>
+  </div>
+
+  <div class="content-section">
+    <div class="content-label">Hashtags</div>
+    <div class="content-hashtags">${escHtml(c.hashtags)}</div>
+  </div>
+
+  <div class="content-actions">${approveBtn}</div>
+</div>`;
+}
+
+function toggleScript(btn) {
+  const body = btn.nextElementSibling;
+  const open = body.classList.toggle('open');
+  btn.textContent = btn.textContent.replace(/^[▶▼]/, open ? '▼' : '▶');
+}
+
+async function approveContent(id) {
+  try {
+    await api(`/api/content/${id}/approve`, 'POST');
+    toast('Content approved!', 'success');
+    await loadContent();
+    await loadStats();
+  } catch(e) {
+    toast('Error: ' + e.message, 'error');
+  }
+}
+
+// ── Manual scan ────────────────────────────────────────────────────────────
+
+async function triggerScan() {
+  try {
+    await api('/api/trigger/news-scan', 'POST');
+    toast('⚡ News scan started — ideas will appear in ~20 seconds', 'info');
+    setTimeout(() => { loadIdeas(); loadStats(); }, 25000);
+  } catch(e) {
+    toast('Error: ' + e.message, 'error');
+  }
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+
+function toast(msg, type='info') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast ${type} show`;
+  setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// ── Utils ──────────────────────────────────────────────────────────────────
+
+function escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+
+loadStats();
+loadIdeas();
+loadContent();
+setInterval(loadStats, 30000);
+setInterval(() => { loadIdeas(); loadContent(); }, 60000);
+</script>
+</body>
+</html>

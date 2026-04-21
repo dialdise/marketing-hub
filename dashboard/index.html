@@ -752,13 +752,64 @@ async function approveContent(id) {
 // ── Manual scan ────────────────────────────────────────────────────────────
 
 async function triggerScan() {
+  const btn = document.querySelector('.btn-trigger');
+  btn.disabled = true;
+  btn.textContent = '⏳ Scanning…';
   try {
     await api('/api/trigger/news-scan', 'POST');
-    toast('⚡ News scan started — ideas will appear in ~20 seconds', 'info');
-    setTimeout(() => { loadIdeas(); loadStats(); }, 25000);
+    toast('⚡ Scan started — polling for results…', 'info');
+    const panel = document.getElementById('ideasPanel');
+    panel.innerHTML = '<div class="spinner">⏳ Scan in progress — fetching news &amp; generating ideas with Claude…</div>';
+    await pollForScanCompletion();
   } catch(e) {
     toast('Error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⚡ Run Scan Now';
   }
+}
+
+async function pollForScanCompletion() {
+  const startTime = Date.now();
+  const timeout = 3 * 60 * 1000; // 3 minutes
+  let lastScanId = null;
+
+  // get current latest scan id before we started
+  try {
+    const scans = await api('/api/scans?limit=1');
+    if (scans.length) lastScanId = scans[0].id;
+  } catch(e) {}
+
+  return new Promise(resolve => {
+    const interval = setInterval(async () => {
+      if (Date.now() - startTime > timeout) {
+        clearInterval(interval);
+        toast('Scan is taking longer than expected — check back soon', 'info');
+        await loadIdeas();
+        await loadStats();
+        resolve();
+        return;
+      }
+      try {
+        const scans = await api('/api/scans?limit=1');
+        if (!scans.length) return;
+        const latest = scans[0];
+        if (latest.id === lastScanId) return; // scan not started yet
+        if (latest.status === 'success') {
+          clearInterval(interval);
+          toast(`✅ Scan done — ${latest.ideas_generated} ideas generated!`, 'success');
+          await loadIdeas();
+          await loadStats();
+          resolve();
+        } else if (latest.status === 'failed') {
+          clearInterval(interval);
+          toast('❌ Scan failed: ' + (latest.error_msg || 'unknown error'), 'error');
+          await loadIdeas();
+          resolve();
+        }
+      } catch(e) {}
+    }, 5000);
+  });
 }
 
 // ── Toast ──────────────────────────────────────────────────────────────────

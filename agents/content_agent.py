@@ -87,39 +87,20 @@ def generate_content(idea_id: int) -> Content:
         brand = detect_brand(idea.idea_text, idea.rationale or "")
         prompt = build_content_prompt(idea, brand)
 
-        content_tool = {
-            "name": "save_content",
-            "description": "Save the generated content",
-            "input_schema": {
-                "type": "object",
-                "required": ["hook", "copy_text", "hashtags", "cta", "visual_notes"],
-                "properties": {
-                    "hook":         {"type": "string"},
-                    "copy_text":    {"type": "string"},
-                    "script":       {"type": ["string", "null"]},
-                    "hashtags":     {"type": "string"},
-                    "cta":          {"type": "string"},
-                    "visual_notes": {"type": "string"},
-                },
-            },
-        }
-
-        client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+        client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY, timeout=120.0)
         message = client.messages.create(
-            model="claude-sonnet-4-6",
-            max_tokens=4096,
-            tools=[content_tool],
-            tool_choice={"type": "tool", "name": "save_content"},
+            model="claude-haiku-4-5-20251001",
+            max_tokens=2048,
             messages=[{"role": "user", "content": prompt}],
         )
 
-        data = {}
-        for block in message.content:
-            if block.type == "tool_use" and block.name == "save_content":
-                data = block.input
-                break
-        if not data:
-            raise ValueError("No tool_use block returned by Claude")
+        raw = message.content[0].text.strip()
+        import re, json
+        m = re.search(r'```(?:json)?\s*([\s\S]*?)```', raw)
+        if m:
+            raw = m.group(1).strip()
+        start, end = raw.find('{'), raw.rfind('}')
+        data = json.loads(raw[start:end + 1] if start != -1 else raw)
 
         content = Content(
             idea_id=idea_id,

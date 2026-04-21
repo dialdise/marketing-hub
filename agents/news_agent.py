@@ -162,6 +162,7 @@ Reglas: brand debe ser BDFit o MyPacerPro, platform debe ser instagram/tiktok/yo
 
     raw = message.content[0].text if message.content else ""
     print(f"[NewsAgent] Raw response length: {len(raw)} chars")
+    print(f"[NewsAgent] Raw response preview: {repr(raw[:300])}")
     if not raw.strip():
         raise ValueError("Claude devolvio una respuesta vacia")
     ideas = _extract_json(raw)
